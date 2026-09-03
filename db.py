@@ -4,8 +4,12 @@ DB_USER = "system"
 DB_PASSWORD = "itsrickjonas"
 DB_DSN = "localhost:1521/XEPDB1"
 
+def get_connection():
+    """Returns a connection to the Oracle Database."""
+    return oracledb.connect(user=DB_USER, password=DB_PASSWORD, dsn=DB_DSN)
+
 def init_db():
-    connection = oracledb.connect(user=DB_USER, password=DB_PASSWORD, dsn=DB_DSN)
+    connection = get_connection()
     cursor = connection.cursor()
 
     # 1. CUSTOMERS Table
