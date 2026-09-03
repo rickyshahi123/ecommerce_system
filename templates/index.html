@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Inventory & Order Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-brand">
+            <span class="logo-icon">📦</span>
+            <h1>Enterprise Inventory & Order Hub</h1>
+        </div>
+        <div class="db-status">
+            <span class="status-dot"></span> Oracle 21c Connected
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Overview Metrics -->
+        <section class="metrics-row">
+            <div class="metric-card">
+                <h3>Total Products</h3>
+                <p class="metric-value">{{ products|length }}</p>
+            </div>
+            <div class="metric-card">
+                <h3>Total Orders</h3>
+                <p class="metric-value">{{ orders|length }}</p>
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid-two-col">
+            <!-- Inventory Section -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Inventory Management</h2>
+                </div>
+                <form action="/add_product" method="POST" class="form-stacked">
+                    <div class="form-group">
+                        <input type="text" name="name" placeholder="Product Name" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" name="category" placeholder="Category" required>
+                        <input type="number" step="0.01" name="price" placeholder="Price ($)" required>
+                        <input type="number" name="stock" placeholder="Stock Qty" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">+ Add Product</button>
+                </form>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in products %}
+                            <tr>
+                                <td>#{{ item[0] }}</td>
+                                <td><strong>{{ item[1] }}</strong></td>
+                                <td><span class="badge">{{ item[2] }}</span></td>
+                                <td>${{ "%.2f"|format(item[3]) }}</td>
+                                <td>
+                                    <span class="stock-count {% if item[4] < 5 %}low-stock{% endif %}">
+                                        {{ item[4] }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Order Processing Section -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Order Processing</h2>
+                </div>
+                <form action="/add_order" method="POST" class="form-stacked">
+                    <div class="form-group">
+                        <input type="text" name="customer_name" placeholder="Customer Name" required>
+                    </div>
+                    <div class="form-row">
+                        <select name="product_id" required>
+                            <option value="" disabled selected>Select Item</option>
+                            {% for item in products %}
+                            <option value="{{ item[0] }}">
+                                {{ item[1] }} (Available: {{ item[4] }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <input type="number" name="quantity" placeholder="Qty" min="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">✓ Place Order</button>
+                </form>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>#{{ order[0] }}</td>
+                                <td>{{ order[1] }}</td>
+                                <td>{{ order[2] }}</td>
+                                <td>{{ order[3] }}</td>
+                                <td>{{ order[4].strftime('%b %d, %H:%M') if order[4] else '' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
